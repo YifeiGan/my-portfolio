@@ -3,8 +3,24 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronRight, ChevronDown } from "lucide-react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function PortfolioPage() {
+  const [covers, setCovers] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchCovers = async () => {
+      const q = query(collection(db, "photos"), where("isCover", "==", true));
+      const querySnapshot = await getDocs(q);
+      const coverData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCovers(coverData);
+    };
+    fetchCovers();
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 监听容器在 X (水平) 和 Y (垂直) 轴上的滚动进度
@@ -48,9 +64,9 @@ export default function PortfolioPage() {
     <main
       ref={containerRef}
       // 开启 X 和 Y 轴双向滚动，隐藏原生滚动条，开启段落吸附 ( snap )
-      className="w-screen h-screen overflow-auto snap-x snap-y snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-[#fafafa]"
+      className="w-screen h-screen overflow-auto snap-x snap-y snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-[url('/background.png')] bg-cover bg-center"
     >
-      <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet"
+      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400..900&family=Comfortaa:wght@300..700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Stardos+Stencil:wght@400;700&display=swap" rel="stylesheet"
       />
 
       {/* ==================== 动态背景层 ( Z-0 & Z-10 ) - 固定不动 ==================== */}
@@ -62,20 +78,22 @@ export default function PortfolioPage() {
         <motion.h1
           style={{
             opacity: nameOpacity,
-            fontFamily: "'Libre Caslon Text', serif", // Lora
-            fontWeight: 400              // 粗细 (400-700)
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontWeight: 700,              // 粗细 (400-700)
+            backgroundImage: "url('/clouds.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
-          className="absolute text-white text-7xl md:text-[12rem] drop-shadow-sm select-none z-20"
+          className="absolute bg-clip-text text-transparent text-7xl md:text-[25rem] select-none z-20"
         >
           Gan Yifei
         </motion.h1>
 
         {/* Layer 2: 蓝色天空色块 (伪边界盒子) - Z-10 */}
-        {/* ⚠️ 核心：这里去除了 w-[85vw] 和 rounded 属性，直接水平舖滿 */}
-        <motion.div
+        {/* <motion.div
           style={{ scaleY: skyboxScaleY, opacity: skyboxOpacity }}
           className="absolute w-full h-[40vh] bg-[#4a6b8c] shadow-inner origin-center"
-        />
+        /> */}
       </motion.div>
 
 
@@ -98,7 +116,7 @@ export default function PortfolioPage() {
             y: birdY_X,
             opacity: birdOpacityX,
           }}
-          className="w-[80%] md:w-[60%] h-auto drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)] origin-center"
+          className="w-[80%] md:w-[50%] h-auto origin-center"
         />
       </motion.div>
 
@@ -120,13 +138,92 @@ export default function PortfolioPage() {
           </div>
         </div>
 
-        {/* 2. 摄影作品集 ( 100vw, 0 ) - 右滑到达 ( Section 1 ) */}
-        <div className="absolute top-0 left-[100vw] w-screen h-screen bg-[#fafafa] flex flex-col items-center justify-center snap-center pointer-events-auto shadow-2xl overflow-visible">
-          <h2 className="text-4xl font-light tracking-widest text-gray-300 uppercase">
-            Photography
-          </h2>
-          <p className="mt-4 text-gray-400 italic">在此处放置瀑布流照片墙 ( 留白 )</p>
-          {/* 此时燕鸥和天空已飞走消失 */}
+        {/* 2. 摄影作品集 - 右滑到达：全屏蓝色调布局 */}
+        <div className="absolute top-0 left-[100vw] w-screen h-screen flex snap-center pointer-events-auto overflow-hidden bg-black">
+
+          {/* 左侧大列：包含 Birds 和 Street */}
+          <motion.div
+            layout
+            className="flex flex-col h-full border-r border-white/10"
+            style={{ flex: 1.6 }} // 保持你的初始权重
+            whileHover={{ flex: 1.7 }} // 保持你的悬停权重
+            transition={{ duration: 0.6, ease: [0.36, 1, 0.22, 1] }}
+          >
+            {/* 左上：Birds */}
+            <motion.div
+              layout
+              className="relative w-full overflow-hidden cursor-pointer group border-b border-white/10"
+              style={{ flex: 0.85 }}
+              whileHover={{ flex: 1 }}
+              transition={{ duration: 0.6, ease: "circOut" }}
+              onClick={() => window.location.href = '/photography/birds'}
+            >
+              {covers.find(c => c.category === "birds") && (
+                <img
+                  src={covers.find(c => c.category === "birds").url}
+                  alt="birds"
+                  className="absolute inset-0 w-full h-full object-cover object-[50%_60%] group-hover:scale-105 transition-transform duration-1000"
+                />
+              )}
+
+              {/* 💡 关键：蓝色调叠加层 (混合模式) */}
+              <div className="absolute inset-0 bg-[#425567] mix-blend-color z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+
+              {/* 💡 标题：默认显示，悬停隐藏 */}
+              <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
+                <h3 className="text-3xl md:text-5xl font-light uppercase tracking-[0.3em]">Birds</h3>
+              </div>
+            </motion.div>
+
+            {/* 左下：Street */}
+            <motion.div
+              layout
+              className="relative w-full overflow-hidden cursor-pointer group"
+              style={{ flex: 1 }}
+              whileHover={{ flex: 1.15 }}
+              transition={{ duration: 0.6, ease: "circOut" }}
+              onClick={() => window.location.href = '/photography/street'}
+            >
+              {covers.find(c => c.category === "street") && (
+                <img
+                  src={covers.find(c => c.category === "street").url}
+                  alt="street"
+                  className="absolute inset-0 w-full h-full object-cover object-[40%_80%] group-hover:scale-104 transition-transform duration-1000"
+                />
+              )}
+
+              <div className="absolute inset-0 bg-[#425567] mix-blend-color z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+
+              <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.3)_0%,_transparent_70%)]">
+                <h3 className="text-3xl md:text-5xl font-light uppercase tracking-[0.3em]">Street</h3>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* 右侧大列：Landscape 独占 */}
+          <motion.div
+            layout
+            className="relative h-full overflow-hidden cursor-pointer group"
+            style={{ flex: 1 }} // 初始权重
+            whileHover={{ flex: 1.1 }} // 悬停权重
+            transition={{ duration: 0.6, ease: [0.36, 1, 0.22, 1] }}
+            onClick={() => window.location.href = '/photography/landscape'}
+          >
+            {covers.find(c => c.category === "landscape") && (
+              <img
+                src={covers.find(c => c.category === "landscape").url}
+                alt="landscape"
+                className="absolute inset-0 w-full h-full object-cover object-[0%_100%] group-hover:scale-102 transition-transform duration-1000"
+              />
+            )}
+
+            <div className="absolute inset-0 bg-[#425567] mix-blend-color z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
+
+            <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
+              <h3 className="text-5xl md:text-4xl font-light uppercase tracking-[0.4em]">Landscape</h3>
+            </div>
+          </motion.div>
+
         </div>
 
         {/* 3. 代码部分 ( 0, 100vh ) - 下滑到达 ( Section 2 ) */}
