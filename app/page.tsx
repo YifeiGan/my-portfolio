@@ -205,7 +205,7 @@ export default function PortfolioPage() {
             layout
             className="relative h-full overflow-hidden cursor-pointer group"
             style={{ flex: 1 }} // 初始权重
-            whileHover={{ flex: 1.1 }} // 悬停权重
+            whileHover={{ flex: 1 }} // 悬停权重
             transition={{ duration: 0.6, ease: [0.36, 1, 0.22, 1] }}
             onClick={() => window.location.href = '/photography/landscape'}
           >
