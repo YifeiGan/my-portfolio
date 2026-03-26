@@ -19,13 +19,13 @@ export default function PortfolioPage() {
   const skyboxOpacity = useTransform(scrollXProgress, [0.5, 1], [1, 0]);
 
   // 2. 名字半透明，逐渐变浅消失 ( Z-0 底层固定层 )
-  const nameOpacity = useTransform(scrollXProgress, [0, 0.5], [0.8, 0]); // 初始 0.4 半透明
+  const nameOpacity = useTransform(scrollXProgress, [0, 0.5], [0.7, 0]); // 初始半透明
 
   // 3. 燕鸥破框飞走消失动画 ( Z-50 超顶层固定层 )
   // 燕鸥放大飞走 ( 放大至 5 倍，向右上方飞出 )
   const birdScale = useTransform(scrollXProgress, [0, 1], [1, 0.1]);
-  const birdX = useTransform(scrollXProgress, [0, 1], ["10vw", "-100vw"]);
-  const birdY_X = useTransform(scrollXProgress, [0, 1], ["0vh", "-50vh"]);
+  const birdX = useTransform(scrollXProgress, [0, 1], ["20vw", "-100vw"]);
+  const birdY_X = useTransform(scrollXProgress, [0, 1], ["-5vh", "-50vh"]);
   // 燕鸥透明度：飞出时变透明消失
   const birdOpacityX = useTransform(scrollXProgress, [0, 0.4], [1, 0]);
 
@@ -50,7 +50,7 @@ export default function PortfolioPage() {
       // 开启 X 和 Y 轴双向滚动，隐藏原生滚动条，开启段落吸附 ( snap )
       className="w-screen h-screen overflow-auto snap-x snap-y snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-[#fafafa]"
     >
-      <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet"
+      <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet"
       />
 
       {/* ==================== 动态背景层 ( Z-0 & Z-10 ) - 固定不动 ==================== */}
@@ -62,12 +62,12 @@ export default function PortfolioPage() {
         <motion.h1
           style={{
             opacity: nameOpacity,
-            fontFamily: "'EB Garamond', serif", // Lora
+            fontFamily: "'Libre Caslon Text', serif", // Lora
             fontWeight: 400              // 粗细 (400-700)
           }}
-          className="absolute text-white text-8xl md:text-[12rem] drop-shadow-sm select-none z-20"
+          className="absolute text-white text-7xl md:text-[12rem] drop-shadow-sm select-none z-20"
         >
-          Yifei Gan
+          Gan Yifei
         </motion.h1>
 
         {/* Layer 2: 蓝色天空色块 (伪边界盒子) - Z-10 */}
@@ -84,6 +84,7 @@ export default function PortfolioPage() {
         style={{
           x: birdX_Vertical,
           y: birdY_Vertical,
+          scale: birdScale_Vertical,
           opacity: homeOpacity
         }}
         className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center pointer-events-none z-50"
