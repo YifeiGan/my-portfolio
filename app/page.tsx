@@ -73,12 +73,32 @@ export default function PortfolioPage() {
     }
   };
 
+  const scrollToPhotography = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        left: window.innerWidth, // 滚动距离为屏幕宽度 (100vw)
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToCode = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: window.innerHeight, // 滚动距离为屏幕高度 (100vh)
+        left: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
   // 监听容器在 X (水平) 和 Y (垂直) 轴上的滚动进度
   const { scrollXProgress, scrollYProgress } = useScroll({
     container: containerRef,
   });
 
-  // ========== 核心优化：使用 useSpring 缓冲滚动吸附导致的数值突变 ==========
+  // ========== 使用 useSpring 缓冲滚动吸附导致的数值突变 ==========
   const springConfig = { stiffness: 400, damping: 40, restDelta: 0.001 };
   const smoothScrollX = useSpring(scrollXProgress, springConfig);
   const smoothScrollY = useSpring(scrollYProgress, springConfig);
@@ -160,7 +180,7 @@ export default function PortfolioPage() {
           style={{ y: homeY, opacity: homeOpacity, visibility: homeVisibility }}
           className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center pointer-events-none z-0"
         >
-          {/* Layer 1 (底): 你的名字 (半透明背景字) */}
+          {/* Layer 1 (底) */}
           <motion.h1
             style={{
               opacity: nameOpacity,
@@ -183,7 +203,7 @@ export default function PortfolioPage() {
         </motion.div>
 
 
-        {/* ==================== 燕鸥前景层 ( Z-50 极高，确保飞在所有东西之上 ) ==================== */}
+        {/* ==================== 燕鸥前景层 ==================== */}
         <motion.div
           style={{
             x: birdX_Vertical,
@@ -214,12 +234,18 @@ export default function PortfolioPage() {
           {/* 1. 首页占位符 ( 0, 0 ) - 起始点，提供滚动吸附点和提示 */}
           <div className="absolute top-0 left-0 w-screen h-screen snap-center pointer-events-auto">
             {/* 右滑提示 (指向摄影页) */}
-            <div className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse">
+            <div
+              onClick={scrollToPhotography}
+              className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+            >
               <p className="text-xs tracking-widest mr-2 uppercase">Photography</p>
               <ChevronRight size={24} />
             </div>
             {/* 下滑提示 (指向代码页) */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-400 animate-pulse">
+            <div
+              onClick={scrollToCode}
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+            >
               <p className="text-xs tracking-widest mb-2 uppercase">Code</p>
               <ChevronDown size={24} />
             </div>
