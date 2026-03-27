@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence, useSpring } from "framer-motion";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -20,9 +20,21 @@ export default function PortfolioPage() {
   // 2. 解绑请求与定时器
   useEffect(() => {
     let isMounted = true;
+    const isReturning = window.location.hash === '#photography';
 
-    // 每次路由切回该页面时，强制重置加载状态并重新计时
-    setIsLoading(true);
+    // 如果是带有 hash 返回，直接取消 Loading 并瞬间定位；否则正常显示 Loading
+    if (isReturning) {
+      setIsLoading(false);
+      setTimeout(() => {
+        containerRef.current?.scrollTo({
+          left: window.innerWidth,
+          top: 0,
+          behavior: 'instant'
+        });
+      }, 50);
+    } else {
+      setIsLoading(true);
+    }
 
     const fetchData = async () => {
       try {
@@ -38,11 +50,15 @@ export default function PortfolioPage() {
 
     fetchData();
 
-    const loadingTimer = setTimeout(() => {
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    }, 1500);
+    let loadingTimer: NodeJS.Timeout;
+
+    if (!isReturning) {
+      loadingTimer = setTimeout(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }, 1500);
+    }
 
     return () => {
       isMounted = false;
@@ -92,7 +108,16 @@ export default function PortfolioPage() {
       });
     }
   };
-  
+
+  const scrollToHome = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        left: 0,
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
   // 监听容器在 X (水平) 和 Y (垂直) 轴上的滚动进度
   const { scrollXProgress, scrollYProgress } = useScroll({
     container: containerRef,
@@ -254,6 +279,15 @@ export default function PortfolioPage() {
           {/* 2. 摄影作品集 - 右滑到达：全屏蓝色调布局 */}
           <div className="absolute top-0 left-[100vw] w-screen h-screen flex snap-center pointer-events-auto overflow-hidden bg-black">
 
+            {/* 返回首页按钮 */}
+            <div
+              onClick={scrollToHome}
+              className="absolute left-10 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+            >
+              <ChevronLeft size={24} />
+              <p className="text-xs tracking-widest ml-2 uppercase">Home</p>
+            </div>
+
             {/* 左侧大列：包含 Birds 和 Street */}
             <motion.div
               layout
@@ -350,6 +384,15 @@ export default function PortfolioPage() {
 
           {/* 3. 代码部分 ( 0, 100vh ) - 下滑到达 ( Section 2 ) */}
           <div className="absolute top-[100vh] left-0 w-screen h-screen bg-gray-900 text-white flex flex-col items-center justify-center snap-center pointer-events-auto z-20 overflow-visible">
+
+            {/* 返回首页按钮 */}
+            <div
+              onClick={scrollToHome}
+              className="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+            >
+              <ChevronUp size={24} />
+              <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
+            </div>
             {/* 此时燕鸥和天空整体向上飞出并变透明消失 */}
             <h2 className="text-4xl font-mono tracking-tighter text-gray-500">
               {"<Code />"}
