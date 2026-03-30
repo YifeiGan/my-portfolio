@@ -25,6 +25,7 @@ export default function GalleryClient({ category }: { category: string }) {
     const [heroPhoto, setHeroPhoto] = useState<Photo | null>(null);
     const [otherPhotos, setOtherPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isHeroLoaded, setIsHeroLoaded] = useState(false);
 
     const targetRef = useRef<HTMLDivElement>(null);
     const carouselRef = useRef<HTMLDivElement>(null);
@@ -125,7 +126,7 @@ export default function GalleryClient({ category }: { category: string }) {
         <div className="bg-black text-white min-h-screen">
             {/* ==================== 加载遮罩层 ==================== */}
             <AnimatePresence mode="wait">
-                {loading && (
+                {(loading || (heroPhoto && !isHeroLoaded)) && (
                     <motion.div
                         key="gallery-loader"
                         initial={{ opacity: 1 }}
@@ -178,6 +179,7 @@ export default function GalleryClient({ category }: { category: string }) {
                         sizes="100vw"
                         className="object-cover object-center"
                         priority
+                        onLoad={() => setIsHeroLoaded(true)}
                     />
                     {/* <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black" /> */}
                     <div className="absolute bottom-16 flex flex-col items-center animate-pulse opacity-70">
@@ -187,7 +189,7 @@ export default function GalleryClient({ category }: { category: string }) {
                 </section>
             )}
 
-            <section ref={targetRef} style={{ height: `${otherPhotos.length * 60 + 200}vh` }} className="relative bg-black">
+            <section ref={targetRef} style={{ height: `${otherPhotos.length * 60 + 200}vh` }} className="relative bg-[#3a3c45]">
                 <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center">
 
                     {/* 横向滚动画廊 */}
