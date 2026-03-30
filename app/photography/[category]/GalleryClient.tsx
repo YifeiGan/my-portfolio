@@ -49,10 +49,14 @@ export default function GalleryClient({ category }: { category: string }) {
                 // 取宽和高中较大的那个填充系数，并多加 0.1 作为安全余量防止露边
                 setDynamicScale(Math.max(scaleH, scaleW) + 0.1);
             }
-            const lastWidth = lastEl.getBoundingClientRect().width;
 
-            const centerOffset = (window.innerWidth / 2) - (lastWidth / 2);
-            const maxScroll = carouselRef.current.scrollWidth - centerOffset - lastWidth;
+            // --- 使用 offset 属性代替 getBoundingClientRect 和 scrollWidth ---
+            // offsetWidth 获取元素的原始物理宽度，不受 scale 影响
+            const lastWidth = lastEl.offsetWidth;
+            // offsetLeft 获取元素左侧相对于父容器的固定距离
+            const lastOffsetLeft = lastEl.offsetLeft;
+
+            const maxScroll = (lastOffsetLeft + lastWidth / 2) - (window.innerWidth / 2);
 
             setScrollRange(Math.max(0, maxScroll));
         }
@@ -100,25 +104,25 @@ export default function GalleryClient({ category }: { category: string }) {
         offset: ["start start", "end end"]
     });
 
-    const springConfig = { stiffness: 200, damping: 40, restDelta: 0.001 };
-    const smoothScrollY = useSpring(scrollYProgress, springConfig);
+    // const springConfig = { stiffness: 200, damping: 40, restDelta: 0.001 };
+    // const smoothScrollY = useSpring(scrollYProgress, springConfig);
 
     // ========== 💡 动画映射 ==========
     // 0 到 0.75：横向滚动画廊，将最后一张照片拉到屏幕中央
-    const translateX = useTransform(smoothScrollY, [0, 0.75], [0, -scrollRange]);
+    const translateX = useTransform(scrollYProgress, [0, 0.75], [0, -scrollRange]);
 
     // 0.75 到 1.0：对最后一张照片进行物理放大，并偏移制造“放大到死角”的效果
-    const lastPhotoScale = useTransform(smoothScrollY, [0.75, 1], [1, dynamicScale]);
-    const lastPhotoX = useTransform(smoothScrollY, [0.75, 1.0], ["0vw", "0vw"]); // 取消左右偏移
-    const lastPhotoY = useTransform(smoothScrollY, [0.75, 1.0], ["0vh", "0vh"]); // 取消上下偏移
+    const lastPhotoScale = useTransform(scrollYProgress, [0.75, 1], [1, dynamicScale]);
+    const lastPhotoX = useTransform(scrollYProgress, [0.75, 1.0], ["0vw", "0vw"]); // 取消左右偏移
+    const lastPhotoY = useTransform(scrollYProgress, [0.75, 1.0], ["0vh", "0vh"]); // 取消上下偏移
 
     // 隐藏最后一张照片底部的一句话
-    const lastTextOpacity = useTransform(smoothScrollY, [0.75, 0.8], [1, 0]);
+    const lastTextOpacity = useTransform(scrollYProgress, [0.75, 0.8], [1, 0]);
 
     // 全局暗色遮罩和最终文字的淡入
-    const maskOpacity = useTransform(smoothScrollY, [0.75, 1.0], [0, 0.5]); // 控制背景有多暗
-    const finalContentOpacity = useTransform(smoothScrollY, [0.85, 1.0], [0, 1]);
-    const finalContentY = useTransform(smoothScrollY, [0.85, 1.0], [30, 0]);
+    const maskOpacity = useTransform(scrollYProgress, [0.75, 1.0], [0, 0.5]); // 控制背景有多暗
+    const finalContentOpacity = useTransform(scrollYProgress, [0.85, 1.0], [0, 1]);
+    const finalContentY = useTransform(scrollYProgress, [0.85, 1.0], [30, 0]);
 
     const lastPhoto = otherPhotos[otherPhotos.length - 1];
 
@@ -215,7 +219,7 @@ export default function GalleryClient({ category }: { category: string }) {
                 </section>
             )}
 
-            <section ref={targetRef} style={{ height: `${otherPhotos.length * 60 + 200}vh` }} className="relative bg-[#3a3c45]">
+            <section ref={targetRef} style={{ height: `${otherPhotos.length * 100 + 200}vh` }} className="relative bg-[#3a3c45]">
                 <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center">
 
                     {/* 横向滚动画廊 */}
