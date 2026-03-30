@@ -171,7 +171,7 @@ export default function GalleryClient({ category }: { category: string }) {
             </nav>
 
             {heroPhoto && (
-                <section className="relative w-screen h-screen flex items-center justify-center">
+                <section className="relative w-screen h-screen flex items-center justify-center overflow-hidden">
                     <Image
                         src={heroPhoto.url}
                         alt={heroPhoto.title || category}
@@ -181,8 +181,34 @@ export default function GalleryClient({ category }: { category: string }) {
                         priority
                         onLoad={() => setIsHeroLoaded(true)}
                     />
-                    {/* <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black" /> */}
-                    <div className="absolute bottom-16 flex flex-col items-center animate-pulse opacity-70">
+
+                    {/* 1. 添加一个从左到右的暗色渐变遮罩，确保左侧文字不会被过亮的图片背景吃掉 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+                    {/* 2. 文字内容容器：定位在左侧垂直居中 */}
+                    <div className="absolute left-[8vw] md:left-[10vw] bottom-0.5 -translate-y-1/2 max-w-lg z-10 pointer-events-none">
+                        <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                            className="text-4xl md:text-6xl font-light uppercase tracking-[0.3em] mb-6 text-white"
+                        >
+                        </motion.h1>
+
+                        {heroPhoto.oneLiner && (
+                            <motion.p
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+                                className="text-gray-300 font-racing italic font-extralight tracking-widest leading-relaxed text-sm md:text-base"
+                            >
+                                {heroPhoto.oneLiner}
+                            </motion.p>
+                        )}
+                    </div>
+
+                    {/* 原有的向下滚动提示 */}
+                    <div className="absolute bottom-16 flex flex-col items-center animate-pulse opacity-70 z-10">
                         <p className="text-xs tracking-widest uppercase mb-4 font-light">Scroll down to explore</p>
                         <div className="w-[1px] h-16 bg-white" />
                     </div>
@@ -229,7 +255,7 @@ export default function GalleryClient({ category }: { category: string }) {
                                         style={isLast ? { opacity: lastTextOpacity } : {}}
                                         className="w-full text-center mt-auto"
                                     >
-                                        <p className="text-sm font-light text-gray-400 tracking-wider">
+                                        <p className="text-sm font-racing text-gray-400 tracking-wider">
                                             {photo.oneLiner || "The ancient oak stands resilient against the wind."}
                                         </p>
                                     </motion.div>
