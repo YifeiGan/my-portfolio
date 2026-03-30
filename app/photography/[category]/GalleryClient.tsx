@@ -100,7 +100,7 @@ export default function GalleryClient({ category }: { category: string }) {
         offset: ["start start", "end end"]
     });
 
-    const springConfig = { stiffness: 400, damping: 40, restDelta: 0.001 };
+    const springConfig = { stiffness: 200, damping: 40, restDelta: 0.001 };
     const smoothScrollY = useSpring(scrollYProgress, springConfig);
 
     // ========== 💡 动画映射 ==========
@@ -246,6 +246,7 @@ export default function GalleryClient({ category }: { category: string }) {
                                             sizes="100vh"
                                             style={{ width: 'auto', height: '100%' }}
                                             className="object-contain"
+                                            priority={true}
                                             onLoad={updateScrollRange}
                                         />
                                     </motion.div>
@@ -256,7 +257,7 @@ export default function GalleryClient({ category }: { category: string }) {
                                         className="w-full text-center mt-auto"
                                     >
                                         <p className="text-sm font-racing text-gray-400 tracking-wider">
-                                            {photo.oneLiner || "The ancient oak stands resilient against the wind."}
+                                            {photo.oneLiner}
                                         </p>
                                     </motion.div>
                                 </div>
