@@ -131,7 +131,8 @@ export default function PortfolioPage() {
   // ========== 水平滑动动画 (0 -> 1 代表向右滑到摄影页) ==========、
 
   // 1. 名字半透明，逐渐变浅消失 ( Z-0 底层固定层 )
-  const nameOpacity = useTransform(scrollXProgress, [0, 0.5], [0.7, 0]); // 初始半透明
+  const nameOpacity = useTransform(smoothScrollX, [0, 0.4, 1], [0.7, 0, 0]);
+  const nameVisibility = useTransform(smoothScrollX, [0.4, 0.41], ["visible", "hidden"]);
 
   // 2. 燕鸥破框飞走消失动画 ( Z-50 超顶层固定层 )
   // 燕鸥放大飞走 ( 向右上方飞出 )
@@ -206,19 +207,27 @@ export default function PortfolioPage() {
           className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center pointer-events-none z-0"
         >
           {/* Layer 1 (底) */}
-          <motion.h1
-            style={{
-              opacity: nameOpacity,
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontWeight: 700,              // 粗细 (400-700)
-              backgroundImage: "url('/clouds.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-            className="absolute bg-clip-text text-transparent text-7xl md:text-[25rem] select-none z-20"
+          <motion.div
+            style={{ opacity: nameOpacity, visibility: nameVisibility }}
+            className="absolute flex flex-col items-end z-20"
           >
-            Gan Yifei
-          </motion.h1>
+            <span className="text-white/80 text-sm md:text-xl tracking-tight font-light mb-[-1rem] md:mb-[-4rem] pr-[1vw] z-30 pointer-events-none -translate-y-[2rem]">
+              欢迎来到干意非的缓冲区
+            </span>
+
+            <h1
+              style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontWeight: 700,
+                backgroundImage: "url('/clouds.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+              className="bg-clip-text text-transparent text-7xl md:text-[25rem] select-none leading-none"
+            >
+              Gan Yifei
+            </h1>
+          </motion.div>
 
           {/* Layer 2: 蓝色天空色块 (伪边界盒子) - Z-10 */}
           {/* <motion.div
@@ -321,7 +330,7 @@ export default function PortfolioPage() {
 
                 {/* 💡 标题：默认显示，悬停隐藏 */}
                 <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
-                  <h3 className="text-3xl md:text-5xl font-light uppercase tracking-[0.3em]">Birds</h3>
+                  <h3 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em]">Birds</h3>
                 </div>
               </motion.div>
 
@@ -348,7 +357,7 @@ export default function PortfolioPage() {
                 <div className="absolute inset-0 bg-[#425567]/60 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
 
                 <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.3)_0%,_transparent_70%)]">
-                  <h3 className="text-3xl md:text-5xl font-light uppercase tracking-[0.3em]">Street</h3>
+                  <h3 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em]">Street</h3>
                 </div>
               </motion.div>
             </motion.div>
