@@ -175,7 +175,7 @@ export default function GalleryClient({ category }: { category: string }) {
             </nav>
 
             {heroPhoto && (
-                <section className="relative w-screen h-screen flex items-center justify-center overflow-hidden">
+                <section className="sticky top-0 z-0 w-screen h-screen flex items-center justify-center overflow-hidden">
                     <Image
                         src={heroPhoto.url}
                         alt={heroPhoto.title || category}
@@ -219,8 +219,8 @@ export default function GalleryClient({ category }: { category: string }) {
                 </section>
             )}
 
-            <section ref={targetRef} style={{ height: `${otherPhotos.length * 100 + 200}vh` }} className="relative bg-[#3a3c45]">
-                <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center">
+            <section ref={targetRef} style={{ height: `${otherPhotos.length * 100 + 200}vh` }} className="relative z-10">
+                <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center bg-black/20 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/10">
 
                     {/* 横向滚动画廊 */}
                     <motion.div
