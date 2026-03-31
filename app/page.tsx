@@ -458,30 +458,34 @@ export default function PortfolioPage() {
           </div>
 
           {/* 3. 代码部分 ( 0, 100vh ) - 下滑到达 ( Section 2 ) */}
-          <div className="absolute top-[100vh] left-0 w-screen h-screen bg-[#0d1117] text-white flex flex-col items-center pt-24 pb-10 snap-center pointer-events-auto z-20 overflow-hidden">
+          <div className="absolute top-[100vh] left-0 w-screen h-screen bg-[#2a3542] text-white flex flex-col items-center pt-24 pb-10 snap-center pointer-events-auto z-20 overflow-hidden">
+            <img
+              src="/bird_logo_dark.png"
+              alt=""
+              aria-hidden="true"
+              className="absolute z-0 left-[-14vw] bottom-[-8vh] w-[72vw] max-w-[920px] min-w-[420px] pointer-events-none select-none"
+            />
 
-            {/* 返回首页按钮 */}
-            <div
-              onClick={scrollToHome}
-              className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-500 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
-            >
-              <ChevronUp size={24} />
-              <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
-            </div>
+            <div className="relative z-10 w-full h-full flex flex-col items-center">
+              {/* 返回首页按钮 */}
+              <div
+                onClick={scrollToHome}
+                className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-500 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+              >
+                <ChevronUp size={24} />
+                <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
+              </div>
 
-            <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-10 flex items-center gap-4">
+            {/* <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-10 flex items-center gap-4">
               <GithubIcon size={40} />
               {"<Code />"}
-            </h2>
+            </h2> */}
 
-            {/* 内部滚动容器：项目较多时可以在此处上下滑动 */}
-            <div className="w-full max-w-6xl px-6 md:px-12 pt-2 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {/* 内部滚动容器：项目较多时可以在此处上下滑动 */}
+              <div className="w-full max-w-6xl px-6 md:px-12 pt-16 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
               <section className="w-full pb-20">
                 <div className="max-w-6xl mx-auto">
-                  <h3 className="text-base md:text-lg text-center text-gray-300 font-medium mb-8">
-                    No RAGrets: A Modular NLP System for Smart Literature Discovery and Paper Vetting
-                  </h3>
 
                   <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl border border-gray-700/60 bg-[#11161d] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
                     <img
@@ -539,6 +543,7 @@ export default function PortfolioPage() {
                 </div>
               </section>
 
+              </div>
             </div>
           </div>
 

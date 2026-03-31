@@ -39,6 +39,10 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Yifei's Comfort Zone",
   description: "做个好梦",
+  icons: {
+    icon: "/web_logo.png",
+    apple: "/web_logo.png",
+  },
 };
 
 export default function RootLayout({
