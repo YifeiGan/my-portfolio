@@ -90,8 +90,7 @@ export default function PortfolioPage() {
     const pinnedRepoPaths = [
       "No-RAGrets-Research/baseline-model",
       "No-RAGrets-Research/llm_paper_reviewer",
-      "No-RAGrets-Research/llm_to_knowledge_graph",
-      "No-RAGrets-Research/SciBERT_Training"
+      "No-RAGrets-Research/llm_to_knowledge_graph"
     ];
 
     Promise.all(
