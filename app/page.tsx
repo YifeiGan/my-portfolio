@@ -469,59 +469,75 @@ export default function PortfolioPage() {
               <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-8 flex items-center gap-4">
+            <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-10 flex items-center gap-4">
               <GithubIcon size={40} />
               {"<Code />"}
             </h2>
 
             {/* 内部滚动容器：项目较多时可以在此处上下滑动 */}
-            <div className="w-full max-w-6xl px-6 md:px-12 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="w-full max-w-6xl px-6 md:px-12 pt-2 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-                {pinnedProjects.map((project, index) => (
-                  <motion.a
-                    key={index}
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ y: -5 }}
-                    className="flex flex-col p-6 rounded-xl bg-[#161b22] border border-gray-700/50 hover:border-gray-500 transition-colors group cursor-pointer text-left h-full"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <GithubIcon size={18} className="text-gray-400 group-hover:text-white transition-colors" />
-                      <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors truncate">
-                        {project.repo}
-                      </h3>
-                    </div>
+              <section className="w-full pb-20">
+                <div className="max-w-6xl mx-auto">
+                  <h3 className="text-base md:text-lg text-center text-gray-300 font-medium mb-8">
+                    No RAGrets: A Modular NLP System for Smart Literature Discovery and Paper Vetting
+                  </h3>
 
-                    <p className="text-sm text-gray-400 flex-1 mb-4 line-clamp-3">
-                      {project.description}
-                    </p>
+                  <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl border border-gray-700/60 bg-[#11161d] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                    <img
+                      src="/Carbonbridge%20Poster%20Team%202.jpg"
+                      alt="Carbonbridge poster"
+                      className="block w-full h-auto"
+                    />
+                  </div>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-gray-800">
-                      {project.language && (
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: project.languageColor || '#8b949e' }}
-                          />
-                          <span>{project.language}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pinnedProjects.map((project, index) => (
+                      <motion.a
+                        key={index}
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ y: -5 }}
+                        className="flex flex-col p-6 rounded-xl bg-[#161b22] border border-gray-700/50 hover:border-gray-500 transition-colors group cursor-pointer text-left h-full"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <GithubIcon size={18} className="text-gray-400 group-hover:text-white transition-colors" />
+                          <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors truncate">
+                            {project.repo}
+                          </h3>
                         </div>
-                      )}
 
-                      <div className="flex items-center gap-1 hover:text-white transition-colors">
-                        <Star size={14} />
-                        <span>{project.stars || 0}</span>
-                      </div>
+                        <p className="text-sm text-gray-400 flex-1 mb-4 line-clamp-3">
+                          {project.description}
+                        </p>
 
-                      <div className="flex items-center gap-1 hover:text-white transition-colors">
-                        <GitFork size={14} />
-                        <span>{project.forks || 0}</span>
-                      </div>
-                    </div>
-                  </motion.a>
-                ))}
-              </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-gray-800">
+                          {project.language && (
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: project.languageColor || '#8b949e' }}
+                              />
+                              <span>{project.language}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-1 hover:text-white transition-colors">
+                            <Star size={14} />
+                            <span>{project.stars || 0}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 hover:text-white transition-colors">
+                            <GitFork size={14} />
+                            <span>{project.forks || 0}</span>
+                          </div>
+                        </div>
+                      </motion.a>
+                    ))}
+                  </div>
+                </div>
+              </section>
 
             </div>
           </div>
