@@ -4,15 +4,34 @@ import React, { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence, useSpring } from "framer-motion";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, GitFork } from "lucide-react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+const GithubIcon = ({ size = 24, className = "" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+    <path d="M9 18c-4.51 2-5-2-7-2" />
+  </svg>
+);
 
 export default function PortfolioPage() {
   const [covers, setCovers] = React.useState<any[]>([]);
 
   // 加载状态控制
   const [isLoading, setIsLoading] = useState(true);
+  const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -66,7 +85,55 @@ export default function PortfolioPage() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    // 必须使用 "Owner/Repo" 的格式，请将 YifeiGan 替换为实际拥有该仓库的组织或用户名
+    const pinnedRepoPaths = [
+      "No-RAGrets-Research/baseline-model",
+      "No-RAGrets-Research/llm_paper_reviewer",
+      "No-RAGrets-Research/llm_to_knowledge_graph",
+      "No-RAGrets-Research/SciBERT_Training"
+    ];
+
+    Promise.all(
+      pinnedRepoPaths.map(repoPath =>
+        fetch(`https://api.github.com/repos/${repoPath}`)
+          .then(res => {
+            if (!res.ok) throw new Error(`Failed to fetch ${repoPath}`);
+            return res.json();
+          })
+      )
+    )
+      .then(data => {
+        const finalProjects = data.map((item: any) => ({
+          repo: item.name,
+          link: item.html_url,
+          description: item.description || "No description provided.",
+          language: item.language,
+          languageColor: item.language === "Python" ? "#3572A5" : item.language === "Jupyter Notebook" ? "#DA5B0B" : "#8b949e",
+          stars: item.stargazers_count,
+          forks: item.forks_count,
+        }));
+
+        setPinnedProjects(finalProjects);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch GitHub projects:", error);
+        setPinnedProjects([
+          {
+            repo: "baseline-model",
+            link: "https://github.com/No-RAGrets-Research/baseline-model",
+            description: "No-RAGrets-Research baseline model",
+            language: "Python",
+            languageColor: "#3572A5",
+            stars: 0,
+            forks: 0
+          }
+        ]);
+      });
+  }, []);
+
   const containerRef = useRef<HTMLDivElement>(null);
+
   // 动态锁定次要滚动轴，防止进入右下角死区
   const handleScrollLock = () => {
     if (!containerRef.current) return;
@@ -392,25 +459,71 @@ export default function PortfolioPage() {
           </div>
 
           {/* 3. 代码部分 ( 0, 100vh ) - 下滑到达 ( Section 2 ) */}
-          <div className="absolute top-[100vh] left-0 w-screen h-screen bg-gray-900 text-white flex flex-col items-center justify-center snap-center pointer-events-auto z-20 overflow-visible">
+          <div className="absolute top-[100vh] left-0 w-screen h-screen bg-[#0d1117] text-white flex flex-col items-center pt-24 pb-10 snap-center pointer-events-auto z-20 overflow-hidden">
 
             {/* 返回首页按钮 */}
             <div
               onClick={scrollToHome}
-              className="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+              className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-500 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
             >
               <ChevronUp size={24} />
               <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
             </div>
-            {/* 此时燕鸥和天空整体向上飞出并变透明消失 */}
-            <h2 className="text-4xl font-mono tracking-tighter text-gray-500">
+
+            <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-8 flex items-center gap-4">
+              <GithubIcon size={40} />
               {"<Code />"}
             </h2>
-            <p className="mt-4 text-gray-600">在此处放置垂直滚动的项目展示卡片 ( 留白 )</p>
 
-            {/* 垂直滚动的占位符，模拟代码页“下滑下来就是完整页面”且无水平滑动的质感 */}
-            <div className="mt-10 h-32 w-48 border border-gray-700/50 rounded-lg flex items-center justify-center text-gray-600 p-4">
-              (垂直滚动的项目内容...)
+            {/* 内部滚动容器：项目较多时可以在此处上下滑动 */}
+            <div className="w-full max-w-6xl px-6 md:px-12 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+                {pinnedProjects.map((project, index) => (
+                  <motion.a
+                    key={index}
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ y: -5 }}
+                    className="flex flex-col p-6 rounded-xl bg-[#161b22] border border-gray-700/50 hover:border-gray-500 transition-colors group cursor-pointer text-left h-full"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <GithubIcon size={18} className="text-gray-400 group-hover:text-white transition-colors" />
+                      <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors truncate">
+                        {project.repo}
+                      </h3>
+                    </div>
+
+                    <p className="text-sm text-gray-400 flex-1 mb-4 line-clamp-3">
+                      {project.description}
+                    </p>
+
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-gray-800">
+                      {project.language && (
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: project.languageColor || '#8b949e' }}
+                          />
+                          <span>{project.language}</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1 hover:text-white transition-colors">
+                        <Star size={14} />
+                        <span>{project.stars || 0}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 hover:text-white transition-colors">
+                        <GitFork size={14} />
+                        <span>{project.forks || 0}</span>
+                      </div>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+
             </div>
           </div>
 
