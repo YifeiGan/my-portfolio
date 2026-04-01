@@ -34,21 +34,27 @@ export default function PortfolioPage() {
   const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
   const router = useRouter();
   const pathname = usePathname();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // 综合处理数据获取与 Loading 状态（包含缓存处理与兜底机制）
   // 2. 解绑请求与定时器
   useEffect(() => {
     let isMounted = true;
-    const isReturning = window.location.hash === '#photography';
+    const isReturning = window.location.hash === "#photography";
+
+    // 移动端后台标签页会节流 setTimeout，用最长等待保证遮罩一定会关掉
+    const maxWaitTimer = window.setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 5000);
 
     // 如果是带有 hash 返回，直接取消 Loading 并瞬间定位；否则正常显示 Loading
     if (isReturning) {
       setIsLoading(false);
-      setTimeout(() => {
+      window.setTimeout(() => {
         containerRef.current?.scrollTo({
           left: window.innerWidth,
           top: 0,
-          behavior: 'instant'
+          behavior: "auto",
         });
       }, 50);
     } else {
@@ -69,10 +75,10 @@ export default function PortfolioPage() {
 
     fetchData();
 
-    let loadingTimer: NodeJS.Timeout;
+    let loadingTimer: number | undefined;
 
     if (!isReturning) {
-      loadingTimer = setTimeout(() => {
+      loadingTimer = window.setTimeout(() => {
         if (isMounted) {
           setIsLoading(false);
         }
@@ -81,7 +87,8 @@ export default function PortfolioPage() {
 
     return () => {
       isMounted = false;
-      clearTimeout(loadingTimer);
+      if (loadingTimer !== undefined) window.clearTimeout(loadingTimer);
+      window.clearTimeout(maxWaitTimer);
     };
   }, [pathname]);
 
@@ -130,8 +137,6 @@ export default function PortfolioPage() {
         ]);
       });
   }, []);
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // 动态锁定次要滚动轴，防止进入右下角死区
   const handleScrollLock = () => {
@@ -270,36 +275,45 @@ export default function PortfolioPage() {
         {/* ==================== 动态背景层 ( Z-0 & Z-10 ) - 固定不动 ==================== */}
         <motion.div
           style={{ y: homeY, opacity: homeOpacity, visibility: homeVisibility }}
-          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center pointer-events-none z-0"
+          className="pointer-events-none fixed top-0 left-0 z-0 flex h-screen w-screen items-center justify-center"
         >
-          {/* Layer 1 (底) */}
-          <motion.div
-            style={{ opacity: nameOpacity, visibility: nameVisibility }}
-            className="absolute flex flex-col items-end z-20"
-          >
-            <span className="text-white/80 text-sm md:text-xl tracking-tight font-light mb-[-1rem] md:mb-[-4rem] pr-[1vw] z-30 pointer-events-none -translate-y-[2rem]">
-              欢迎来到干意非的缓冲区
-            </span>
-
-            <h1
-              style={{
-                fontFamily: "'Bebas Neue', sans-serif",
-                fontWeight: 700,
-                backgroundImage: "url('/clouds.png')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-              className="bg-clip-text text-transparent text-7xl md:text-[25rem] select-none leading-none"
+          <div className="flex h-full w-full max-md:-translate-y-[6vh] items-center justify-center md:translate-y-0">
+            {/* Layer 1 (底) */}
+            <motion.div
+              style={{ opacity: nameOpacity, visibility: nameVisibility }}
+              className="absolute z-20 flex max-w-[calc(100vw-2rem)] flex-col items-start md:max-w-none md:items-end
+              left-4 top-1/2 -translate-y-1/2
+              md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
             >
-              Gan Yifei
-            </h1>
-          </motion.div>
+              <h1
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontWeight: 700,
+                  backgroundImage: "url('/clouds.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+                className="order-1 bg-clip-text text-transparent text-9xl md:text-[25rem] select-none leading-none md:whitespace-nowrap
+                flex flex-col items-start text-left md:order-2 md:block md:text-right"
+              >
+                <span className="block md:inline">Gan</span>
+                <span className="hidden md:inline"> </span>
+                <span className="block md:inline">Yifei</span>
+              </h1>
 
-          {/* Layer 2: 蓝色天空色块 (伪边界盒子) - Z-10 */}
-          {/* <motion.div
+              <span className="order-2 -mt-2 max-w-[min(18rem,calc(100vw-2rem))] text-left text-[11px] leading-snug text-white/70 
+            tracking-tight md:order-1 md:mt-0 md:max-w-none md:text-right md:text-xl md:text-white/80 md:tracking-tight 
+            md:font-light md:mb-[-4rem] md:pr-[1vw] md:-translate-y-[2rem] pointer-events-none translate-x-3">
+                欢迎来到干意非的缓冲区
+              </span>
+            </motion.div>
+
+            {/* Layer 2: 蓝色天空色块 (伪边界盒子) - Z-10 */}
+            {/* <motion.div
           style={{ scaleY: skyboxScaleY, opacity: skyboxOpacity }}
           className="absolute w-full h-[40vh] bg-[#4a6b8c] shadow-inner origin-center"
         /> */}
+          </div>
         </motion.div>
 
 
@@ -312,19 +326,23 @@ export default function PortfolioPage() {
             opacity: homeOpacity,
             visibility: homeVisibility
           }}
-          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center pointer-events-none z-50"
+          className="pointer-events-none fixed top-0 left-0 z-50 flex h-screen w-screen items-center justify-center"
         >
-          <motion.img
-            src="/tern.png"
-            alt="Arctic Tern"
-            style={{
-              scale: birdScale,
-              x: birdX,
-              y: birdY_X,
-              opacity: birdOpacityX,
-            }}
-            className="w-[80%] md:w-[50%] h-auto origin-center"
-          />
+          <div className="flex h-full w-full max-md:-translate-y-[6vh] items-center justify-center md:translate-y-0">
+            <div className="flex w-full translate-y-[14vh] justify-center md:translate-y-0">
+              <motion.img
+                src="/tern.png"
+                alt="Arctic Tern"
+                style={{
+                  scale: birdScale,
+                  x: birdX,
+                  y: birdY_X,
+                  opacity: birdOpacityX,
+                }}
+                className="w-[58%] md:w-[50%] h-auto origin-center"
+              />
+            </div>
+          </div>
         </motion.div>
 
 
@@ -332,22 +350,30 @@ export default function PortfolioPage() {
         <div className="relative w-[200vw] h-[200vh] pointer-events-none">
 
           {/* 1. 首页占位符 ( 0, 0 ) - 起始点，提供滚动吸附点和提示 */}
-          <div className="absolute top-0 left-0 w-screen h-screen snap-center pointer-events-auto">
+          <div className="pointer-events-auto absolute top-0 left-0 h-screen w-screen max-md:-translate-y-[6vh] snap-center md:translate-y-0">
             {/* 右滑提示 (指向摄影页) */}
             <div
               onClick={scrollToPhotography}
-              className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors md:right-10"
             >
-              <p className="text-xs tracking-widest mr-2 uppercase">Photography</p>
-              <ChevronRight size={24} />
+              <p className="mr-1 text-[9px] font-medium tracking-[0.18em] uppercase md:mr-2 md:text-xs md:tracking-widest">
+                Photography
+              </p>
+              <ChevronRight className="h-4 w-4 shrink-0 md:h-6 md:w-6" strokeWidth={2} aria-hidden />
             </div>
             {/* 下滑提示 (指向代码页) */}
             <div
               onClick={scrollToCode}
               className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
             >
-              <p className="text-xs tracking-widest mb-2 uppercase">Code</p>
-              <ChevronDown size={24} />
+              <p className="mb-2 text-[9px] font-medium uppercase tracking-[0.18em] md:text-xs md:tracking-widest">
+                Code
+              </p>
+              <ChevronDown
+                className="h-4 w-4 shrink-0 md:h-6 md:w-6"
+                strokeWidth={2}
+                aria-hidden
+              />
             </div>
           </div>
 
@@ -357,10 +383,16 @@ export default function PortfolioPage() {
             {/* 返回首页按钮 */}
             <div
               onClick={scrollToHome}
-              className="absolute left-10 top-1/2 -translate-y-1/2 flex items-center text-gray-400 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
+              className="absolute left-10 top-1/2 z-50 flex -translate-y-1/2 cursor-pointer items-center text-gray-400 animate-pulse transition-colors hover:text-white max-md:top-[calc(50%-6vh)]"
             >
-              <ChevronLeft size={24} />
-              <p className="text-xs tracking-widest ml-2 uppercase">Home</p>
+              <ChevronLeft
+                className="h-4 w-4 shrink-0 md:h-6 md:w-6"
+                strokeWidth={2}
+                aria-hidden
+              />
+              <p className="ml-2 text-[9px] font-medium uppercase tracking-[0.18em] md:text-xs md:tracking-widest">
+                Home
+              </p>
             </div>
 
             {/* 左侧大列：包含 Birds 和 Street */}
@@ -472,11 +504,17 @@ export default function PortfolioPage() {
                 onClick={scrollToHome}
                 className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center text-gray-500 animate-pulse cursor-pointer z-50 hover:text-white transition-colors"
               >
-                <ChevronUp size={24} />
-                <p className="text-xs tracking-widest mt-2 uppercase">Home</p>
+                <ChevronUp
+                  className="h-4 w-4 shrink-0 md:h-6 md:w-6"
+                  strokeWidth={2}
+                  aria-hidden
+                />
+                <p className="mt-2 text-[9px] font-medium uppercase tracking-[0.18em] md:text-xs md:tracking-widest">
+                  Home
+                </p>
               </div>
 
-            {/* <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-10 flex items-center gap-4">
+              {/* <h2 className="text-4xl md:text-5xl font-mono tracking-tighter text-gray-400 mb-10 flex items-center gap-4">
               <GithubIcon size={40} />
               {"<Code />"}
             </h2> */}
@@ -484,64 +522,64 @@ export default function PortfolioPage() {
               {/* 内部滚动容器：项目较多时可以在此处上下滑动 */}
               <div className="w-full max-w-6xl px-6 md:px-12 pt-16 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-              <section className="w-full pb-20">
-                <div className="max-w-6xl mx-auto">
+                <section className="w-full pb-20">
+                  <div className="max-w-6xl mx-auto">
 
-                  <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl border border-gray-700/60 bg-[#11161d] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-                    <img
-                      src="/Carbonbridge%20Poster%20Team%202.jpg"
-                      alt="Carbonbridge poster"
-                      className="block w-full h-auto"
-                    />
-                  </div>
+                    <div className="w-full max-w-5xl mx-auto mb-8 rounded-2xl border border-gray-700/60 bg-[#11161d] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                      <img
+                        src="/Carbonbridge%20Poster%20Team%202.jpg"
+                        alt="Carbonbridge poster"
+                        className="block w-full h-auto"
+                      />
+                    </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {pinnedProjects.map((project, index) => (
-                      <motion.a
-                        key={index}
-                        href={project.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ y: -5 }}
-                        className="flex flex-col p-6 rounded-xl bg-[#161b22] border border-gray-700/50 hover:border-gray-500 transition-colors group cursor-pointer text-left h-full"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <GithubIcon size={18} className="text-gray-400 group-hover:text-white transition-colors" />
-                          <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors truncate">
-                            {project.repo}
-                          </h3>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {pinnedProjects.map((project, index) => (
+                        <motion.a
+                          key={index}
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ y: -5 }}
+                          className="flex flex-col p-6 rounded-xl bg-[#161b22] border border-gray-700/50 hover:border-gray-500 transition-colors group cursor-pointer text-left h-full"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <GithubIcon size={18} className="text-gray-400 group-hover:text-white transition-colors" />
+                            <h3 className="font-semibold text-blue-400 group-hover:text-blue-300 transition-colors truncate">
+                              {project.repo}
+                            </h3>
+                          </div>
 
-                        <p className="text-sm text-gray-400 flex-1 mb-4 line-clamp-3">
-                          {project.description}
-                        </p>
+                          <p className="text-sm text-gray-400 flex-1 mb-4 line-clamp-3">
+                            {project.description}
+                          </p>
 
-                        <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-gray-800">
-                          {project.language && (
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: project.languageColor || '#8b949e' }}
-                              />
-                              <span>{project.language}</span>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-gray-800">
+                            {project.language && (
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: project.languageColor || '#8b949e' }}
+                                />
+                                <span>{project.language}</span>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-1 hover:text-white transition-colors">
+                              <Star size={14} />
+                              <span>{project.stars || 0}</span>
                             </div>
-                          )}
 
-                          <div className="flex items-center gap-1 hover:text-white transition-colors">
-                            <Star size={14} />
-                            <span>{project.stars || 0}</span>
+                            <div className="flex items-center gap-1 hover:text-white transition-colors">
+                              <GitFork size={14} />
+                              <span>{project.forks || 0}</span>
+                            </div>
                           </div>
-
-                          <div className="flex items-center gap-1 hover:text-white transition-colors">
-                            <GitFork size={14} />
-                            <span>{project.forks || 0}</span>
-                          </div>
-                        </div>
-                      </motion.a>
-                    ))}
+                        </motion.a>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </section>
+                </section>
 
               </div>
             </div>
