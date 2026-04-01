@@ -410,7 +410,7 @@ export default function PortfolioPage() {
             </div>
 
             {/* 角落装饰 Logo */}
-            <div className="pointer-events-none absolute left-3 top-16 z-[5] w-[min(32vw,9rem)] md:left-10 md:top-10 md:w-55">
+            <div className="pointer-events-none absolute left-3 top-16 z-[5] w-[min(32vw,9rem)] md:left-10 md:top-7 md:w-70">
               <Image
                 src="/photo_page_logo1_black.png"
                 alt=""
@@ -419,7 +419,7 @@ export default function PortfolioPage() {
                 className="h-auto w-full object-contain opacity-90"
               />
             </div>
-            <div className="pointer-events-none absolute right-3 bottom-4 z-[5] w-[min(36vw,10rem)] md:right-6 md:bottom-6 md:w-50">
+            {/* <div className="pointer-events-none absolute right-3 bottom-4 z-[5] w-[min(36vw,10rem)] md:right-6 md:bottom-6 md:w-50">
               <Image
                 src="/photo_page_logo2_black.png"
                 alt=""
@@ -427,7 +427,7 @@ export default function PortfolioPage() {
                 height={320}
                 className="h-auto w-full object-contain opacity-90"
               />
-            </div>
+            </div> */}
 
             {/* 三张原比例照片，绝对定位叠压，hover 时弹开 */}
             <div
@@ -443,10 +443,10 @@ export default function PortfolioPage() {
                 animate={
                   photoHover === "birds"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
-                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 20 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: 20 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[37%] top-[33%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[42%] top-[33%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "birds")?.url && (
@@ -474,10 +474,10 @@ export default function PortfolioPage() {
                 animate={
                   photoHover === "street"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
-                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 15 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: 15 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[46%] top-[70%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[51%] top-[70%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "street")?.url && (
@@ -505,10 +505,10 @@ export default function PortfolioPage() {
                 animate={
                   photoHover === "landscape"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
-                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 25 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: 25 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[71%] top-[48%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[76%] top-[48%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
                 <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "landscape")?.url && (
