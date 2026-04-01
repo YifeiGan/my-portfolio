@@ -32,6 +32,7 @@ export default function PortfolioPage() {
   // 加载状态控制
   const [isLoading, setIsLoading] = useState(true);
   const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
+  const [photoHover, setPhotoHover] = useState<"street" | "birds" | "landscape" | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,6 +199,13 @@ export default function PortfolioPage() {
   const springConfig = { stiffness: 400, damping: 40, restDelta: 0.001 };
   const smoothScrollX = useSpring(scrollXProgress, springConfig);
   const smoothScrollY = useSpring(scrollYProgress, springConfig);
+
+  const photoMotionTransition = {
+    type: "spring" as const,
+    stiffness: 320,
+    damping: 32,
+    mass: 0.65,
+  };
 
   // ========== 水平滑动动画 (0 -> 1 代表向右滑到摄影页) ==========、
 
@@ -378,12 +386,18 @@ export default function PortfolioPage() {
           </div>
 
           {/* 2. 摄影作品集 - 右滑到达：全屏蓝色调布局 */}
-          <div className="absolute top-0 left-[100vw] w-screen h-screen flex snap-center pointer-events-auto overflow-hidden bg-black">
+          <div className="pointer-events-auto absolute top-0 left-[100vw] h-screen w-screen snap-center overflow-x-hidden overflow-y-auto md:overflow-hidden">
+            {/* 背景图 + 模糊 */}
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center"
+              style={{ backgroundImage: "url('/photo_bg.jpg')" }}
+            />
+            <div className="absolute inset-0 z-[1] bg-black/20 backdrop-blur-2xl backdrop-saturate-150" />
 
             {/* 返回首页按钮 */}
             <div
               onClick={scrollToHome}
-              className="absolute left-10 top-1/2 z-50 flex -translate-y-1/2 cursor-pointer items-center text-gray-400 animate-pulse transition-colors hover:text-white max-md:top-[calc(50%-6vh)]"
+              className="absolute left-10 top-1/2 z-[60] flex -translate-y-1/2 cursor-pointer items-center text-gray-400 animate-pulse transition-colors hover:text-white max-md:top-[calc(50%-6vh)]"
             >
               <ChevronLeft
                 className="h-4 w-4 shrink-0 md:h-6 md:w-6"
@@ -395,97 +409,124 @@ export default function PortfolioPage() {
               </p>
             </div>
 
-            {/* 左侧大列：包含 Birds 和 Street */}
-            <motion.div
-              layout
-              className="flex flex-col h-full border-r border-white/10"
-              style={{ flex: 1.6 }} // 保持你的初始权重
-              whileHover={{ flex: 1.7 }} // 保持你的悬停权重
-              transition={{ duration: 0.6, ease: [0.36, 1, 0.22, 1] }}
+            {/* 角落装饰 Logo */}
+            <div className="pointer-events-none absolute left-3 top-16 z-[5] w-[min(32vw,9rem)] md:left-10 md:top-10 md:w-55">
+              <Image
+                src="/photo_page_logo1_black.png"
+                alt=""
+                width={320}
+                height={320}
+                className="h-auto w-full object-contain opacity-90"
+              />
+            </div>
+            <div className="pointer-events-none absolute right-3 bottom-4 z-[5] w-[min(36vw,10rem)] md:right-6 md:bottom-6 md:w-50">
+              <Image
+                src="/photo_page_logo2_black.png"
+                alt=""
+                width={320}
+                height={320}
+                className="h-auto w-full object-contain opacity-90"
+              />
+            </div>
+
+            {/* 三张原比例照片，绝对定位叠压，hover 时弹开 */}
+            <div
+              className="relative h-full w-full"
+              onMouseLeave={() => setPhotoHover(null)}
             >
-              {/* 左上：Birds */}
-              <motion.div
-                layout
-                className="relative w-full overflow-hidden cursor-pointer group border-b border-white/10"
-                style={{ flex: 0.85 }}
-                whileHover={{ flex: 1 }}
-                transition={{ duration: 0.6, ease: "circOut" }}
-                onClick={() => router.push('/photography/birds')}
+              {/* Birds — 中间偏上 1/3 */}
+              <motion.button
+                type="button"
+                onClick={() => router.push("/photography/birds")}
+                onMouseEnter={() => setPhotoHover("birds")}
+                onMouseLeave={() => setPhotoHover(null)}
+                animate={
+                  photoHover === "birds"
+                    ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 20 }
+                }
+                transition={photoMotionTransition}
+                className="group absolute left-[37%] top-[33%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
-                {covers.find(c => c.category === "birds") && (
-                  <Image
-                    src={covers.find(c => c.category === "birds").url}
-                    alt="birds"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="absolute inset-0 w-full h-full object-cover object-[50%_60%] group-hover:scale-105 transition-transform duration-1000"
-                    priority
-                  />
-                )}
-
-                {/* 💡 关键：蓝色调叠加层 (混合模式) */}
-                <div className="absolute inset-0 bg-[#425567]/60 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
-
-                {/* 💡 标题：默认显示，悬停隐藏 */}
-                <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
-                  <h3 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em]">Birds</h3>
+                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                  {covers.find((c) => c.category === "birds")?.url && (
+                    <img
+                      src={covers.find((c) => c.category === "birds")!.url}
+                      alt="Birds"
+                      className="block h-[28vh] w-auto md:h-[42vh]"
+                    />
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
+                    <span className="text-xl font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-3xl">
+                      Birds
+                    </span>
+                  </div>
                 </div>
-              </motion.div>
+              </motion.button>
 
-              {/* 左下：Street */}
-              <motion.div
-                layout
-                className="relative w-full overflow-hidden cursor-pointer group"
-                style={{ flex: 1 }}
-                whileHover={{ flex: 1.15 }}
-                transition={{ duration: 0.6, ease: "circOut" }}
-                onClick={() => router.push('/photography/street')}
+              {/* Street — 中间偏下 1/3 */}
+              <motion.button
+                type="button"
+                onClick={() => router.push("/photography/street")}
+                onMouseEnter={() => setPhotoHover("street")}
+                onMouseLeave={() => setPhotoHover(null)}
+                animate={
+                  photoHover === "street"
+                    ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 15 }
+                }
+                transition={photoMotionTransition}
+                className="group absolute left-[46%] top-[70%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
-                {covers.find(c => c.category === "street") && (
-                  <Image
-                    src={covers.find(c => c.category === "street").url}
-                    alt="street"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="absolute inset-0 w-full h-full object-cover object-[40%_80%] group-hover:scale-104 transition-transform duration-1000"
-                    priority
-                  />
-                )}
-
-                <div className="absolute inset-0 bg-[#425567]/60 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
-
-                <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.3)_0%,_transparent_70%)]">
-                  <h3 className="text-3xl md:text-4xl font-light uppercase tracking-[0.3em]">Street</h3>
+                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                  {covers.find((c) => c.category === "street")?.url && (
+                    <img
+                      src={covers.find((c) => c.category === "street")!.url}
+                      alt="Street"
+                      className="block h-[28vh] w-auto md:h-[48vh]"
+                    />
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
+                    <span className="text-xl font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-3xl">
+                      Street
+                    </span>
+                  </div>
                 </div>
-              </motion.div>
-            </motion.div>
+              </motion.button>
 
-            {/* 右侧大列：Landscape 独占 */}
-            <motion.div
-              layout
-              className="relative h-full overflow-hidden cursor-pointer group"
-              style={{ flex: 1 }} // 初始权重
-              whileHover={{ flex: 1 }} // 悬停权重
-              transition={{ duration: 0.6, ease: [0.36, 1, 0.22, 1] }}
-              onClick={() => router.push('/photography/landscape')}
-            >
-              {covers.find(c => c.category === "landscape") && (
-                <Image
-                  src={covers.find(c => c.category === "landscape").url}
-                  alt="landscape"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="absolute inset-0 w-full h-full object-cover object-[0%_100%] group-hover:scale-102 transition-transform duration-1000"
-                  priority
-                />
-              )}
-
-              <div className="absolute inset-0 bg-[#425567]/60 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-500" />
-
-              <div className="absolute inset-0 flex items-center justify-center text-white z-20 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
-                <h3 className="text-5xl md:text-4xl font-light uppercase tracking-[0.4em]">Landscape</h3>
-              </div>
-            </motion.div>
+              {/* Landscape — 右侧 2/3 位置 */}
+              <motion.button
+                type="button"
+                onClick={() => router.push("/photography/landscape")}
+                onMouseEnter={() => setPhotoHover("landscape")}
+                onMouseLeave={() => setPhotoHover(null)}
+                animate={
+                  photoHover === "landscape"
+                    ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
+                    : { x: "-50%", y: "-50%", scale: 1, zIndex: photoHover ? 10 : 25 }
+                }
+                transition={photoMotionTransition}
+                className="group absolute left-[71%] top-[48%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+              >
+                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                  {covers.find((c) => c.category === "landscape")?.url && (
+                    <img
+                      src={covers.find((c) => c.category === "landscape")!.url}
+                      alt="Landscape"
+                      className="block h-[32vh] w-auto md:h-[61vh]"
+                    />
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
+                    <span className="text-xl font-light uppercase tracking-[0.35em] text-white drop-shadow-lg md:text-2xl">
+                      Landscape
+                    </span>
+                  </div>
+                </div>
+              </motion.button>
+            </div>
 
           </div>
 
