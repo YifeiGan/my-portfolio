@@ -33,6 +33,7 @@ export default function PortfolioPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [pinnedProjects, setPinnedProjects] = useState<any[]>([]);
   const [photoHover, setPhotoHover] = useState<"street" | "birds" | "landscape" | null>(null);
+  const [hasHover, setHasHover] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -138,6 +139,18 @@ export default function PortfolioPage() {
         ]);
       });
   }, []);
+
+  useEffect(() => {
+    setHasHover(window.matchMedia('(hover: hover)').matches);
+  }, []);
+
+  const handlePhotoClick = (category: "street" | "birds" | "landscape", path: string) => {
+    if (hasHover || photoHover === category) {
+      router.push(path);
+    } else {
+      setPhotoHover(category);
+    }
+  };
 
   // 动态锁定次要滚动轴，防止进入右下角死区
   const handleScrollLock = () => {
@@ -433,32 +446,35 @@ export default function PortfolioPage() {
             <div
               className="relative h-full w-full"
               onMouseLeave={() => setPhotoHover(null)}
+              onClick={(e) => {
+                if (e.target === e.currentTarget && !hasHover) setPhotoHover(null);
+              }}
             >
               {/* Birds — 中间偏上 1/3 */}
               <motion.button
                 type="button"
-                onClick={() => router.push("/photography/birds")}
-                onMouseEnter={() => setPhotoHover("birds")}
-                onMouseLeave={() => setPhotoHover(null)}
+                onClick={() => handlePhotoClick("birds", "/photography/birds")}
+                onMouseEnter={hasHover ? () => setPhotoHover("birds") : undefined}
+                onMouseLeave={hasHover ? () => setPhotoHover(null) : undefined}
                 animate={
                   photoHover === "birds"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
                     : { x: "-50%", y: "-50%", scale: 1, zIndex: 20 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[42%] top-[33%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[42%] top-[33%] w-max cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                <div className="relative w-max overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "birds")?.url && (
                     <img
                       src={covers.find((c) => c.category === "birds")!.url}
                       alt="Birds"
-                      className="block h-[28vh] w-auto md:h-[42vh]"
+                      className="block h-[22vh] w-auto md:h-[42vh]"
                     />
                   )}
-                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
-                    <span className="text-xl font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-3xl">
+                  <div className={`pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "birds" ? "opacity-0" : ""}`} />
+                  <div className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "birds" ? "opacity-0" : ""}`}>
+                    <span className="text-[2.5vh] font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-[3.5vh]">
                       Birds
                     </span>
                   </div>
@@ -468,28 +484,28 @@ export default function PortfolioPage() {
               {/* Street — 中间偏下 1/3 */}
               <motion.button
                 type="button"
-                onClick={() => router.push("/photography/street")}
-                onMouseEnter={() => setPhotoHover("street")}
-                onMouseLeave={() => setPhotoHover(null)}
+                onClick={() => handlePhotoClick("street", "/photography/street")}
+                onMouseEnter={hasHover ? () => setPhotoHover("street") : undefined}
+                onMouseLeave={hasHover ? () => setPhotoHover(null) : undefined}
                 animate={
                   photoHover === "street"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
                     : { x: "-50%", y: "-50%", scale: 1, zIndex: 15 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[51%] top-[70%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[51%] top-[70%] w-max cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                <div className="relative w-max overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "street")?.url && (
                     <img
                       src={covers.find((c) => c.category === "street")!.url}
                       alt="Street"
-                      className="block h-[28vh] w-auto md:h-[48vh]"
+                      className="block h-[25vh] w-auto md:h-[48vh]"
                     />
                   )}
-                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
-                    <span className="text-xl font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-3xl">
+                  <div className={`pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "street" ? "opacity-0" : ""}`} />
+                  <div className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "street" ? "opacity-0" : ""}`}>
+                    <span className="text-[2.5vh] font-light uppercase tracking-[0.3em] text-white drop-shadow-lg md:text-[3.5vh]">
                       Street
                     </span>
                   </div>
@@ -499,18 +515,18 @@ export default function PortfolioPage() {
               {/* Landscape — 右侧 2/3 位置 */}
               <motion.button
                 type="button"
-                onClick={() => router.push("/photography/landscape")}
-                onMouseEnter={() => setPhotoHover("landscape")}
-                onMouseLeave={() => setPhotoHover(null)}
+                onClick={() => handlePhotoClick("landscape", "/photography/landscape")}
+                onMouseEnter={hasHover ? () => setPhotoHover("landscape") : undefined}
+                onMouseLeave={hasHover ? () => setPhotoHover(null) : undefined}
                 animate={
                   photoHover === "landscape"
                     ? { x: "-50%", y: "-50%", scale: 1.06, zIndex: 55 }
                     : { x: "-50%", y: "-50%", scale: 1, zIndex: 25 }
                 }
                 transition={photoMotionTransition}
-                className="group absolute left-[76%] top-[48%] cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                className="group absolute left-[76%] top-[48%] w-max cursor-pointer border-0 bg-transparent p-0 shadow-none outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               >
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
+                <div className="relative w-max overflow-hidden rounded-2xl shadow-2xl md:rounded-3xl">
                   {covers.find((c) => c.category === "landscape")?.url && (
                     <img
                       src={covers.find((c) => c.category === "landscape")!.url}
@@ -518,9 +534,9 @@ export default function PortfolioPage() {
                       className="block h-[32vh] w-auto md:h-[61vh]"
                     />
                   )}
-                  <div className="pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0" />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0">
-                    <span className="text-xl font-light uppercase tracking-[0.35em] text-white drop-shadow-lg md:text-2xl">
+                  <div className={`pointer-events-none absolute inset-0 bg-[#425567]/50 transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "landscape" ? "opacity-0" : ""}`} />
+                  <div className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out group-hover:opacity-0 ${photoHover === "landscape" ? "opacity-0" : ""}`}>
+                    <span className="text-[1.6vh] font-light uppercase tracking-[0.35em] text-white drop-shadow-lg md:text-[2.5vh]">
                       Landscape
                     </span>
                   </div>

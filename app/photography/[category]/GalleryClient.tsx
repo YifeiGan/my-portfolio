@@ -26,11 +26,19 @@ export default function GalleryClient({ category }: { category: string }) {
     const [otherPhotos, setOtherPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
     const [isHeroLoaded, setIsHeroLoaded] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     const targetRef = useRef<HTMLDivElement>(null);
     const carouselRef = useRef<HTMLDivElement>(null);
     const [scrollRange, setScrollRange] = useState(0);
     const [dynamicScale, setDynamicScale] = useState(1.5);
+
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 768);
+        check();
+        window.addEventListener("resize", check);
+        return () => window.removeEventListener("resize", check);
+    }, []);
 
     const updateScrollRange = () => {
         if (carouselRef.current && carouselRef.current.lastElementChild) {
@@ -100,7 +108,7 @@ export default function GalleryClient({ category }: { category: string }) {
     }, [category]);
 
     const { scrollYProgress } = useScroll({
-        target: targetRef,
+        ...(isMobile ? {} : { target: targetRef }),
         offset: ["start start", "end end"]
     });
 
@@ -174,7 +182,68 @@ export default function GalleryClient({ category }: { category: string }) {
                 <div className="w-10" />
             </nav>
 
-            {heroPhoto && (
+            {/* ==================== 手机端布局：垂直瀑布流 ==================== */}
+            {isMobile && heroPhoto && (
+                <>
+                    <section className="relative w-full pt-16">
+                        <Image
+                            src={heroPhoto.url}
+                            alt={heroPhoto.title || category}
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            style={{ width: '100%', height: 'auto' }}
+                            priority
+                            onLoad={() => setIsHeroLoaded(true)}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        {heroPhoto.oneLiner && (
+                            <motion.p
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 0.6 }}
+                                className="absolute bottom-4 left-0 w-full text-center text-gray-300 font-racing italic font-extralight tracking-widest text-sm px-6"
+                            >
+                                {heroPhoto.oneLiner}
+                            </motion.p>
+                        )}
+                    </section>
+
+                    <section className="px-4 pt-6 pb-20 space-y-6 bg-black/20 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/10">
+                        {otherPhotos.map((photo) => (
+                            <motion.div
+                                key={photo.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-40px" }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                className="flex flex-col"
+                            >
+                                <Image
+                                    src={photo.url}
+                                    alt={photo.title || category}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    style={{ width: '100%', height: 'auto' }}
+                                    className="rounded-lg"
+                                />
+                                {photo.oneLiner && (
+                                    <p className="text-xs font-racing text-gray-500 tracking-wider text-center mt-2">
+                                        {photo.oneLiner}
+                                    </p>
+                                )}
+                            </motion.div>
+                        ))}
+                        <div className="text-center pt-8 pb-4">
+                            <p className="text-sm font-light uppercase tracking-[0.4em] text-gray-500">Fin.</p>
+                        </div>
+                    </section>
+                </>
+            )}
+
+            {/* ==================== 桌面端布局：全屏 Hero + 横向滚动画廊 ==================== */}
+            {!isMobile && heroPhoto && (
                 <section className="sticky top-0 z-0 w-screen h-screen flex items-center justify-center overflow-hidden">
                     <Image
                         src={heroPhoto.url}
@@ -185,33 +254,26 @@ export default function GalleryClient({ category }: { category: string }) {
                         priority
                         onLoad={() => setIsHeroLoaded(true)}
                     />
-
-                    {/* 1. 添加一个从左到右的暗色渐变遮罩，确保左侧文字不会被过亮的图片背景吃掉 */}
                     <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent pointer-events-none" />
-
-                    {/* 2. 文字内容容器：定位在左侧垂直居中 */}
-                    <div className="absolute left-[8vw] md:left-[10vw] bottom-0.5 -translate-y-1/2 max-w-lg z-10 pointer-events-none">
+                    <div className="absolute left-[10vw] bottom-0.5 -translate-y-1/2 max-w-lg z-10 pointer-events-none">
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                            className="text-4xl md:text-6xl font-light uppercase tracking-[0.3em] mb-6 text-white"
+                            className="text-6xl font-light uppercase tracking-[0.3em] mb-6 text-white"
                         >
                         </motion.h1>
-
                         {heroPhoto.oneLiner && (
                             <motion.p
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-                                className="text-gray-300 font-racing italic font-extralight tracking-widest leading-relaxed text-sm md:text-base"
+                                className="text-gray-300 font-racing italic font-extralight tracking-widest leading-relaxed text-base"
                             >
                                 {heroPhoto.oneLiner}
                             </motion.p>
                         )}
                     </div>
-
-                    {/* 原有的向下滚动提示 */}
                     <div className="absolute bottom-16 flex flex-col items-center animate-pulse opacity-70 z-10">
                         <p className="text-xs tracking-widest uppercase mb-4 font-light">Scroll down to explore</p>
                         <div className="w-[1px] h-16 bg-white" />
@@ -219,82 +281,75 @@ export default function GalleryClient({ category }: { category: string }) {
                 </section>
             )}
 
-            <section ref={targetRef} style={{ height: `${otherPhotos.length * 100 + 200}vh` }} className="relative z-10">
-                <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center bg-black/20 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/10">
+            {!isMobile && (
+                <section ref={targetRef} style={{ height: `${otherPhotos.length * 100 + 200}vh` }} className="relative z-10">
+                    <div className="sticky top-0 h-screen w-screen overflow-hidden flex flex-col justify-center bg-black/20 backdrop-blur-2xl backdrop-saturate-150 border-t border-white/10">
 
-                    {/* 横向滚动画廊 */}
-                    <motion.div
-                        ref={carouselRef}
-                        style={{ x: translateX }}
-                        className="flex flex-row flex-nowrap h-[75vh] pl-[10vw] absolute inset-y-auto w-full"
-                    >
-                        {otherPhotos.map((photo, index) => {
-                            const isLast = index === otherPhotos.length - 1;
+                        <motion.div
+                            ref={carouselRef}
+                            style={{ x: translateX }}
+                            className="flex flex-row flex-nowrap h-[75vh] pl-[10vw] absolute inset-y-auto w-full"
+                        >
+                            {otherPhotos.map((photo, index) => {
+                                const isLast = index === otherPhotos.length - 1;
+                                const imgContainerStyle = isLast
+                                    ? { scale: lastPhotoScale, x: lastPhotoX, y: lastPhotoY }
+                                    : {};
 
-                            // 只有最后一张照片挂载放大动画
-                            const imgContainerStyle = isLast
-                                ? { scale: lastPhotoScale, x: lastPhotoX, y: lastPhotoY }
-                                : {};
+                                return (
+                                    <div key={photo.id} className={`h-full flex-shrink-0 flex flex-col group w-max ${isLast ? 'z-10' : 'mr-[5vw]'}`}>
+                                        <motion.div
+                                            style={imgContainerStyle}
+                                            className="overflow-hidden rounded-sm mb-[24px] h-[calc(75vh-40px)] relative"
+                                        >
+                                            <Image
+                                                src={photo.url}
+                                                alt={photo.title || category}
+                                                width={0}
+                                                height={0}
+                                                sizes="100vh"
+                                                style={{ width: 'auto', height: '100%' }}
+                                                className="object-contain"
+                                                priority={true}
+                                                onLoad={updateScrollRange}
+                                            />
+                                        </motion.div>
+                                        <motion.div
+                                            style={isLast ? { opacity: lastTextOpacity } : {}}
+                                            className="w-full text-center mt-auto"
+                                        >
+                                            <p className="text-sm font-racing text-gray-400 tracking-wider">
+                                                {photo.oneLiner}
+                                            </p>
+                                        </motion.div>
+                                    </div>
+                                );
+                            })}
+                        </motion.div>
 
-                            return (
-                                <div key={photo.id} className={`h-full flex-shrink-0 flex flex-col group w-max ${isLast ? 'z-10' : 'mr-[5vw]'}`}>
-                                    <motion.div
-                                        style={imgContainerStyle}
-                                        className="overflow-hidden rounded-sm mb-[24px] h-[calc(75vh-40px)] relative"
-                                    >
-                                        <Image
-                                            src={photo.url}
-                                            alt={photo.title || category}
-                                            width={0}
-                                            height={0}
-                                            sizes="100vh"
-                                            style={{ width: 'auto', height: '100%' }}
-                                            className="object-contain"
-                                            priority={true}
-                                            onLoad={updateScrollRange}
-                                        />
-                                    </motion.div>
+                        {lastPhoto && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+                                <motion.div
+                                    className="absolute inset-0 bg-black"
+                                    style={{ opacity: maskOpacity }}
+                                />
+                                <motion.div
+                                    className="relative z-30 pointer-events-auto flex flex-col items-center max-w-2xl px-8 text-center"
+                                    style={{ opacity: finalContentOpacity, y: finalContentY }}
+                                >
+                                    <h2 className="text-2xl font-light uppercase tracking-[0.4em] mb-8 text-white">
+                                        Fin.
+                                    </h2>
+                                    <p className="text-gray-300 font-light tracking-widest leading-loose">
+                                        The end of the gallery. <br />
+                                    </p>
+                                </motion.div>
+                            </div>
+                        )}
 
-                                    {/* 底部文字 */}
-                                    <motion.div
-                                        style={isLast ? { opacity: lastTextOpacity } : {}}
-                                        className="w-full text-center mt-auto"
-                                    >
-                                        <p className="text-sm font-racing text-gray-400 tracking-wider">
-                                            {photo.oneLiner}
-                                        </p>
-                                    </motion.div>
-                                </div>
-                            );
-                        })}
-                    </motion.div>
-
-                    {/* ========== 独立出来的暗色遮罩与文字层 ========== */}
-                    {lastPhoto && (
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                            {/* 纯粹的渐黑遮罩，盖在放大的照片上 */}
-                            <motion.div
-                                className="absolute inset-0 bg-black"
-                                style={{ opacity: maskOpacity }}
-                            />
-
-                            {/* 浮现的文字 */}
-                            <motion.div
-                                className="relative z-30 pointer-events-auto flex flex-col items-center max-w-2xl px-8 text-center"
-                                style={{ opacity: finalContentOpacity, y: finalContentY }}
-                            >
-                                <h2 className="text-2xl font-light uppercase tracking-[0.4em] mb-8 text-white">
-                                    Fin.
-                                </h2>
-                                <p className="text-gray-300 font-light tracking-widest leading-loose">
-                                    The end of the gallery. <br />
-                                </p>
-                            </motion.div>
-                        </div>
-                    )}
-
-                </div>
-            </section>
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
